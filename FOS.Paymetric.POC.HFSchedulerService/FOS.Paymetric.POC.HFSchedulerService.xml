@@ -35,9 +35,14 @@
             </summary>
             <returns>ActionResult&lt;List&lt;ExisitingRecurringJobBE&gt;&gt;.</returns>
         </member>
-        <member name="T:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.WeatherForecastController">
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Hangfire.RequestController.CreateRequest(System.String,System.String,System.String,System.String,System.String)">
             <summary>
-            1st sample OOB WebAPI controller
+            Queue a request with the information necessary to dynamically load the necessary assy on the other side of the hangfire queue
+            </summary>
+        </member>
+        <member name="T:FOS.Paymetric.POC.HFSchedulerService.Hangfire.StepController">
+            <summary>
+            This is the generic method execute when a task is picked up out a Hangfire queue and executed
             </summary>
         </member>
         <member name="T:FOS.Paymetric.POC.HFSchedulerService.Startup.ApiExplorerGroupPerVersionConvention">

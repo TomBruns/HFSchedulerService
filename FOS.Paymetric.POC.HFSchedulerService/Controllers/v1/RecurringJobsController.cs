@@ -1,4 +1,5 @@
 ﻿using FOS.Paymetric.POC.HFSchedulerService.Entities;
+using FOS.Paymetric.POC.HFSchedulerService.Hangfire;
 using Hangfire;
 using Hangfire.Common;
 using Hangfire.Storage;
@@ -43,8 +44,6 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Controllers.v1
         {
             string recurringJobId = @"some-id".ToLower(); ;
 
-            // Background: each time a recurring job starts it needs to go thru the CreateRequest Step, so that is the one we queue
-
             // 1st remove the Job if it exists
             RecurringJob.RemoveIfExists(recurringJobId);
 
@@ -60,11 +59,20 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Controllers.v1
             //        timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
             //        break;
             //}
-            // run the background jon immediately
+
+            // run the background job immediately
             //_backgroundJobClient.Enqueue(() => Console.WriteLine("Hello Hangfire job!"));
 
-            var manager = new RecurringJobManager();
-            manager.AddOrUpdate(recurringJobId, Job.FromExpression(() => Console.WriteLine("Hello Hangfire job!")), @"0-59 * * * MON,TUE,WED,THU,FRI", timeZoneInfo);
+            // setup a recurring job
+            //var manager = new RecurringJobManager();
+            //manager.AddOrUpdate(recurringJobId, Job.FromExpression(() => Console.WriteLine("Hello Hangfire job!")), @"0-59 * * * MON,TUE,WED,THU,FRI", timeZoneInfo);
+            RecurringJob.AddOrUpdate(recurringJobId, () => RequestController.EnqueueRequest(@"EventTypeA",
+                                                                                            @"FIS.Paymetric.POC.EventTypeA.Plugin.EventTypeAPublisher", 
+                                                                                            @"FIS.Paymetric.POC.EventTypeA.Plugin", 
+                                                                                            @"Execute", 
+                                                                                            @"xtobr"),
+                                                                                           @"0-59 * * * MON,TUE,WED,THU,FRI", 
+                                                                                           timeZoneInfo);
 
             return Ok($"Recurring job: [{recurringJobId}] created.");
         }

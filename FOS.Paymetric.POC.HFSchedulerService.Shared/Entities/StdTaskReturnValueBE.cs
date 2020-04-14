@@ -10,8 +10,6 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Shared.Entities
     {
         public STD_STEP_STATUS StepStatus { get; set; }
 
-        public TimeSpan ContinueAfterDelay { get; set; }
-
         public string ReturnMessage { get; set; }
     }
 }

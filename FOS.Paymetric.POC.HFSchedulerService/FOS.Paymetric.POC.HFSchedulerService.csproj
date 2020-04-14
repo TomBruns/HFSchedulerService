@@ -20,6 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FIS.Paymetric.POC.EventTypeA.Plugin\FIS.Paymetric.POC.EventTypeA.Plugin.csproj" />
+    <ProjectReference Include="..\FOS.Paymetric.POC.HFSchedulerService.Shared\FOS.Paymetric.POC.HFSchedulerService.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="FOS.Paymetric.POC.HFSchedulerService.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

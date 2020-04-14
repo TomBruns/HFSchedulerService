@@ -4,4 +4,8 @@
     <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FOS.Paymetric.POC.HFSchedulerService.Shared\FOS.Paymetric.POC.HFSchedulerService.Shared.csproj" />
+  </ItemGroup>
+
 </Project>
