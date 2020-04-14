@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-
+﻿using FOS.Paymetric.POC.HFSchedulerService.Entities;
 using Hangfire;
 using Hangfire.Common;
 using Hangfire.Storage;
-using Hangfire.Storage.Monitoring;
-
-using FOS.Paymetric.POC.HFSchedulerService.Entities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 
 namespace FOS.Paymetric.POC.HFSchedulerService.Controllers.v1
 {
@@ -27,6 +21,11 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Controllers.v1
         private readonly ILogger<RecurringJobsController> _logger;
         private readonly IBackgroundJobClient _backgroundJobClient;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RecurringJobsController"/> class.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        /// <param name="backgroundJobClient">The background job client.</param>
         public RecurringJobsController(ILogger<RecurringJobsController> logger, IBackgroundJobClient backgroundJobClient)
         {
             _logger = logger;
@@ -34,21 +33,20 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Controllers.v1
         }
 
         /// <summary>
-        /// Schedules the job.
+        /// Schedules a recurring ob.
         /// </summary>
         /// <returns>ActionResult.</returns>
         [HttpPost]
-        [Route("scheduleJob")]
-        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Created)]
         //public void ScheduledJob(int stdRequestTypeID, string jobIdentifier, string pncUserName, string userComments, Dictionary<string, string> wfDataKeyValuePairs, string schedule, string schedule_time_zone)
-        public ActionResult ScheduleJob()
+        public ActionResult ScheduleRecurringJob()
         {
-            string jobIdentifier = @"some-id";
+            string recurringJobId = @"some-id".ToLower(); ;
 
             // Background: each time a recurring job starts it needs to go thru the CreateRequest Step, so that is the one we queue
 
             // 1st remove the Job if it exists
-            RecurringJob.RemoveIfExists(jobIdentifier.ToLower());
+            RecurringJob.RemoveIfExists(recurringJobId);
 
             TimeZoneInfo timeZoneInfo = TimeZoneInfo.Local;
 
@@ -66,19 +64,47 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Controllers.v1
             //_backgroundJobClient.Enqueue(() => Console.WriteLine("Hello Hangfire job!"));
 
             var manager = new RecurringJobManager();
-            manager.AddOrUpdate(jobIdentifier, Job.FromExpression(() => Console.WriteLine("Hello Hangfire job!")), @"0-59 * * * MON,TUE,WED,THU,FRI", timeZoneInfo);
+            manager.AddOrUpdate(recurringJobId, Job.FromExpression(() => Console.WriteLine("Hello Hangfire job!")), @"0-59 * * * MON,TUE,WED,THU,FRI", timeZoneInfo);
 
-            return Ok();
+            return Ok($"Recurring job: [{recurringJobId}] created.");
         }
 
         /// <summary>
-        /// Gets the scheduled jobs.
+        /// Deletes a recurring job.
+        /// </summary>
+        /// <param name="recurringJobId">The recurring job identifier.</param>
+        /// <returns>ActionResult&lt;ExisitingRecurringJobBE&gt;.</returns>
+        [HttpDelete]
+        [Route("{recurringJobId}")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public ActionResult<ExisitingRecurringJobBE> DeleteRecurringJob(string recurringJobId)
+        {
+            List<RecurringJobDto> recurringJobs = JobStorage.Current.GetConnection().GetRecurringJobs();
+
+            recurringJobId = recurringJobId.ToLower();
+
+            var existingRecurringJob = recurringJobs.Where(rj => rj.Id == recurringJobId).FirstOrDefault();
+
+            if(existingRecurringJob != null)
+            {
+                RecurringJob.RemoveIfExists(recurringJobId);
+
+                return Ok($"Recurring job: [{recurringJobId}] deleted.");
+            }
+            else
+            {
+                return NotFound($"No recurring job found matching: [{recurringJobId}].");
+            }
+        }
+
+        /// <summary>
+        /// Gets all of the recurring jobs.
         /// </summary>
         /// <returns>ActionResult&lt;List&lt;ExisitingRecurringJobBE&gt;&gt;.</returns>
         [HttpGet]
-        [Route("scheduleJobs")]
         [ProducesResponseType(typeof(List<ExisitingRecurringJobBE>), (int)HttpStatusCode.OK)]
-        public ActionResult<List<ExisitingRecurringJobBE>> GetScheduledJobs()
+        public ActionResult<List<ExisitingRecurringJobBE>> GetRecurringJobs()
         {
             //var monitoringApi = JobStorage.Current.GetMonitoringApi();
             //var scheduledJobs = monitoringApi.ScheduledJobs(0, (int)monitoringApi.ScheduledCount());

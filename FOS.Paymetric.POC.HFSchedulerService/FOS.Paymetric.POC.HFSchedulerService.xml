@@ -9,15 +9,29 @@
             This class implements api methods related to recurring jobs
             </summary>
         </member>
-        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController.ScheduleJob">
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController.#ctor(Microsoft.Extensions.Logging.ILogger{FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController},Hangfire.IBackgroundJobClient)">
             <summary>
-            Schedules the job.
+            Initializes a new instance of the <see cref="T:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController"/> class.
+            </summary>
+            <param name="logger">The logger.</param>
+            <param name="backgroundJobClient">The background job client.</param>
+        </member>
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController.ScheduleRecurringJob">
+            <summary>
+            Schedules a recurring ob.
             </summary>
             <returns>ActionResult.</returns>
         </member>
-        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController.GetScheduledJobs">
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController.DeleteRecurringJob(System.String)">
             <summary>
-            Gets the scheduled jobs.
+            Deletes a recurring job.
+            </summary>
+            <param name="recurringJobId">The recurring job identifier.</param>
+            <returns>ActionResult&lt;ExisitingRecurringJobBE&gt;.</returns>
+        </member>
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController.GetRecurringJobs">
+            <summary>
+            Gets all of the recurring jobs.
             </summary>
             <returns>ActionResult&lt;List&lt;ExisitingRecurringJobBE&gt;&gt;.</returns>
         </member>

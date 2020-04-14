@@ -59,11 +59,14 @@ namespace FOS.Paymetric.POC.HFSchedulerService
                     Title = "Paymetric Scheduler Service POC WebAPI",
                     Version = "v1",
                     Description = @"Documentation for Public WebAPI that supports Paymetric Scheduler Service. 
-This version leverages:
-    Hangfire as the scheduling engine
-    System.Composition to implement a Plug-In Model
-    Kafka to push tasks to subscribers
-
+<BR><BR>This version leverages:
+- Hangfire as the scheduling engine.
+- System.Composition to implement a Plug-In Model.
+- Kafka to push tasks to subscribers.
+<BR><BR>Important Endpoints:
+- https://localhost:44329/hangfire
+- https://localhost:44329/swagger
+<BR><BR>Version History:
 - 2020/04/14 -v1.0 - Initial Release
                     ",
                     Contact = new OpenApiContact
