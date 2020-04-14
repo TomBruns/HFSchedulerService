@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FOS.Paymetric.POC.HFSchedulerService</name>
+    </assembly>
+    <members>
+        <member name="T:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController">
+            <summary>
+            This class implements api methods related to recurring jobs
+            </summary>
+        </member>
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController.ScheduleJob">
+            <summary>
+            Schedules the job.
+            </summary>
+            <returns>ActionResult.</returns>
+        </member>
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController.GetScheduledJobs">
+            <summary>
+            Gets the scheduled jobs.
+            </summary>
+            <returns>ActionResult&lt;List&lt;ExisitingRecurringJobBE&gt;&gt;.</returns>
+        </member>
+        <member name="T:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.WeatherForecastController">
+            <summary>
+            1st sample OOB WebAPI controller
+            </summary>
+        </member>
+    </members>
+</doc>
