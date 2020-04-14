@@ -40,5 +40,11 @@
             1st sample OOB WebAPI controller
             </summary>
         </member>
+        <member name="T:FOS.Paymetric.POC.HFSchedulerService.Startup.ApiExplorerGroupPerVersionConvention">
+            <summary>
+            Implements Grouping in the Swagger UI using the version that is last part of the namespace
+            </summary>
+            <seealso cref="T:Microsoft.AspNetCore.Mvc.ApplicationModels.IControllerModelConvention" />
+        </member>
     </members>
 </doc>

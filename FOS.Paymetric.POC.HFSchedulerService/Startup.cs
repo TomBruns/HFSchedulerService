@@ -56,19 +56,26 @@ namespace FOS.Paymetric.POC.HFSchedulerService
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "Paymetric Scheduler Service POC WebAPI",
+                    Title = "Scheduler Service POC WebAPI",
                     Version = "v1",
-                    Description = @"Documentation for Public WebAPI that supports Paymetric Scheduler Service. 
-<BR><BR>This version leverages:
-- Hangfire as the scheduling engine.
-- System.Composition to implement a Plug-In Model.
-- Kafka to push tasks to subscribers.
-<BR><BR>Important Endpoints:
-- https://localhost:44329/hangfire
-- https://localhost:44329/swagger
-<BR><BR>Version History:
-- 2020/04/14 -v1.0 - Initial Release
-                    ",
+                    Description = @"Documentation for Public WebAPI to administer Recurring Jobs is the Scheduler Service. 
+### Technologies Leveraged:
+* Hangfire as the scheduling engine.
+* System.Composition to implement a Plug-In Model.
+* Kafka to push tasks to subscribers.
+
+### Important Endpoints:
+
+| Endpoint | Desciption |
+|----------|------------|
+| `https://localhost:<port>/hangfire` | Hangfire Dashboard |
+| `https://localhost:<port>/swagger` | Swagger website for recurring Job WebAPI   |
+
+### Version History:
+
+| Date| Version | Description |
+|----------|----------|----------|
+| 2020/04/14 | v1.0 | Initial Release |",
                     Contact = new OpenApiContact
                     {
                         Name = "US ESA Team",
@@ -90,7 +97,7 @@ namespace FOS.Paymetric.POC.HFSchedulerService
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
 
-                // to avoid issue with BEs in two different namespaces have the same class name
+                // to avoid issue with BEs in two different namespaces that have the same class name
                 c.CustomSchemaIds(i => i.FullName);
             });
         }
@@ -121,6 +128,10 @@ namespace FOS.Paymetric.POC.HFSchedulerService
             app.UseHangfireServer(new BackgroundJobServerOptions { WorkerCount = 2 });
         }
 
+        /// <summary>
+        /// Implements Grouping in the Swagger UI using the version that is last part of the namespace
+        /// </summary>
+        /// <seealso cref="Microsoft.AspNetCore.Mvc.ApplicationModels.IControllerModelConvention" />
         private class ApiExplorerGroupPerVersionConvention : IControllerModelConvention
         {
             public void Apply(ControllerModel controller)
