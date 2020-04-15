@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Composition;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -17,17 +18,33 @@ using Microsoft.OpenApi.Models;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Swashbuckle.AspNetCore.Filters;
+using FOS.Paymetric.POC.HFSchedulerService.Shared.Entities;
+using FOS.Paymetric.POC.HFSchedulerService.Shared.Interfaces;
+using FOS.Paymetric.POC.HFSchedulerService.Shared;
+using System.Runtime.Loader;
+using System.Composition.Hosting;
+using System.Text;
 
 namespace FOS.Paymetric.POC.HFSchedulerService
 {
     public class Startup
     {
+        // this is the subfolder where all the plug-ins will be loaded from
+        const string PLUGIN_FOLDER = @"Plugins";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
+
+        // this collection holds the dynamically loaded assys   
+        //  IEventPublisher is the common interface that all the sample plug-ins will implement
+        //  MessageSenderType has a custom property that will allow us to pick a specific plug-in
+        [ImportMany()]
+        private static IEnumerable<Lazy<IEventPublisher, MessageSenderType>> MessageSenders { get; set; }
+
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -100,6 +117,21 @@ namespace FOS.Paymetric.POC.HFSchedulerService
                 // to avoid issue with BEs in two different namespaces that have the same class name
                 c.CustomSchemaIds(i => i.FullName);
             });
+
+            var kafkaConfig = Configuration.GetSection("kafkaConfig").Get<KafkaServiceConfigBE>();
+
+            // ==========================
+            // load the plug-in assys 
+            // ==========================
+            Compose();
+
+            // ==========================
+            // on startup, inject the config info into all of the plug-ins
+            // ==========================
+            //foreach (var plugin in _messageSenders)
+            //{
+            //    plugin.Value.InjectConfig(kafkaConfig, logger);
+            //}
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -142,5 +174,165 @@ namespace FOS.Paymetric.POC.HFSchedulerService
                 controller.ApiExplorer.GroupName = apiVersion;
             }
         }
+
+        #region Helpers
+
+        /// <summary>
+        /// Dynamically pick the correct plug-in from the ones we loaded
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>IEventPublisher.</returns>
+        private static IEventPublisher GetEventPublisher(string name)
+        {
+            var plugIn = MessageSenders
+              .Where(ms => ms.Metadata.Name.Equals(name))
+              .Select(ms => ms.Value);
+
+            if (plugIn == null || plugIn.Count() == 0)
+            {
+                throw new ApplicationException($"No plug-in found for Event Type: [{name}]");
+            }
+            else if (plugIn.Count() != 1)
+            {
+                throw new ApplicationException($"Multiple plug-ins [{plugIn.Count()}] found for Event Type: [{name}]");
+            }
+            else
+            {
+                return plugIn.FirstOrDefault();
+            }
+        }
+
+        /// <summary>
+        /// Build the composition host from assys that are dynamically loaded from a specific subfolder.
+        /// </summary>
+        private static void Compose()
+        {
+            // build the correct path to load the plug-in assys from
+            var executableLocation = Assembly.GetEntryAssembly().Location;
+            var path = Path.Combine(Path.GetDirectoryName(executableLocation), PLUGIN_FOLDER);
+
+            // get a list of only the managed dlls
+            var managedDlls = GetListOfManagedAssemblies(path, SearchOption.AllDirectories);
+
+            // load the assys
+            var assemblies = managedDlls
+                        .Select(AssemblyLoadContext.Default.LoadFromAssemblyPath)
+                        .ToList();
+
+            // build a composition container
+            var configuration = new ContainerConfiguration()
+                        .WithAssemblies(assemblies);
+
+            try
+            {
+                // load the plug-in assys that export the correct attribute
+                using (var container = configuration.CreateContainer())
+                {
+                    MessageSenders = container.GetExports<Lazy<IEventPublisher, MessageSenderType>>();
+                }
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (Exception exSub in ex.LoaderExceptions)
+                {
+                    sb.AppendLine(exSub.Message);
+                    FileNotFoundException exFileNotFound = exSub as FileNotFoundException;
+                    if (exFileNotFound != null)
+                    {
+                        if (!string.IsNullOrEmpty(exFileNotFound.FusionLog))
+                        {
+                            sb.AppendLine("Fusion Log:");
+                            sb.AppendLine(exFileNotFound.FusionLog);
+                        }
+                    }
+                    sb.AppendLine();
+                }
+                string errorMessage = sb.ToString();
+                Console.WriteLine(errorMessage);
+            }
+        }
+
+        /// <summary>
+        /// Gets the list of managed assemblies.
+        /// </summary>
+        /// <param name="folderPath">The folder path.</param>
+        /// <param name="searchOption">The search option.</param>
+        /// <returns>List&lt;System.String&gt;.</returns>
+        /// <remarks>
+        /// Some of the dlls in the target folder may be unmanaged dlls referenced by managed dlls, we need to exclude those
+        /// </remarks>
+        private static List<string> GetListOfManagedAssemblies(string folderPath, SearchOption searchOption)
+        {
+            List<string> assyPathNames = new List<string>();
+
+            var files = Directory.GetFiles(folderPath, "*.dll", searchOption);
+
+            foreach (var filePathName in files)
+            {
+                try
+                {
+                    // this call will throw an exception if this is not a managed dll
+                    System.Reflection.AssemblyName testAssembly = System.Reflection.AssemblyName.GetAssemblyName(filePathName);
+
+                    assyPathNames.Add(filePathName);
+                }
+                catch
+                {
+                    // swallow the exception and continue
+                }
+            }
+
+            return assyPathNames;
+        }
+
+        /// <summary>
+        /// A research spike into loading each plugin's assys into an isolated AssemblyLoadContext
+        /// </summary>
+        /// <param name="assysToIgnore">The assys to ignore.</param>
+        /// <remarks>
+        /// assysToIgnore is a list of assys NOT to load into the plug-in AssemblyLoadContext so the types will
+        /// match and the a GetExports call will recognize them as the same type
+        /// </remarks>
+        private static void ComposeIsolated(List<string> assysToIgnore)
+        {
+            // build the correct path to load the plug-in assys from
+            var executableLocation = Assembly.GetEntryAssembly().Location;
+            var path = Path.Combine(Path.GetDirectoryName(executableLocation), PLUGIN_FOLDER);
+
+            // find the names of all the plug-in subfolders
+            var plugInFolderPathNames = Directory.GetDirectories(path);
+
+            Dictionary<string, IEnumerable<Lazy<IEventPublisher, MessageSenderType>>> test = new Dictionary<string, IEnumerable<Lazy<IEventPublisher, MessageSenderType>>>();
+
+            // loop thru each plug-in subfolder and load the assys into a separate (isolated) load context.
+            foreach (var plugInFolderPathName in plugInFolderPathNames)
+            {
+                var plugInFolderName = Path.GetFileName(plugInFolderPathName);
+
+                var assyLoadContext = new AssemblyLoadContext(plugInFolderName);
+
+                // get a list of all the assys from that path
+                var assemblies = Directory
+                            .GetFiles(plugInFolderPathName, "*.dll", SearchOption.AllDirectories)
+                            .Where(f => !f.Contains(assysToIgnore[0]))
+                            .Select(assyLoadContext.LoadFromAssemblyPath)
+                            .ToList();
+
+                var configuration = new ContainerConfiguration()
+                            .WithAssemblies(assemblies);
+
+                // load the plug-in assys that export the correct attribute
+                using (var container = configuration.CreateContainer())
+                {
+                    MessageSenders = container.GetExports<Lazy<IEventPublisher, MessageSenderType>>();
+                }
+
+                test.Add(plugInFolderName, MessageSenders);
+
+                MessageSenders = (IEnumerable<Lazy<IEventPublisher, MessageSenderType>>)test.Values.ToList();
+            }
+        }
+        #endregion
     }
 }
