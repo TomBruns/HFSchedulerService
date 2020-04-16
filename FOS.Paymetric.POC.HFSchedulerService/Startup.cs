@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Composition;
+using System.Composition.Hosting;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
+using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -17,13 +20,15 @@ using Microsoft.OpenApi.Models;
 
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Serilog;
+using Serilog.Extensions.Logging;
 using Swashbuckle.AspNetCore.Filters;
+
 using FOS.Paymetric.POC.HFSchedulerService.Shared.Entities;
 using FOS.Paymetric.POC.HFSchedulerService.Shared.Interfaces;
 using FOS.Paymetric.POC.HFSchedulerService.Shared;
-using System.Runtime.Loader;
-using System.Composition.Hosting;
-using System.Text;
+using FOS.Paymetric.POC.HFSchedulerService.Logging;
+using Hangfire.Console;
 
 namespace FOS.Paymetric.POC.HFSchedulerService
 {
@@ -43,20 +48,29 @@ namespace FOS.Paymetric.POC.HFSchedulerService
         //  IEventPublisher is the common interface that all the sample plug-ins will implement
         //  MessageSenderType has a custom property that will allow us to pick a specific plug-in
         [ImportMany()]
-        private static IEnumerable<Lazy<IEventPublisher, MessageSenderType>> MessageSenders { get; set; }
-
+        private static IEnumerable<Lazy<IJobPlugIn, JobPlugInType>> _scheduleTaskPlugIns { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            // configure logging
+            Log.Logger = new LoggerConfiguration()
+                                .WriteTo.Sink(new HangfireConsoleSink())
+                                //.WriteTo.Console()
+                                .CreateLogger();
+
+            //var logger = new SerilogLoggerProvider(Log.Logger).CreateLogger(nameof(Program));
+            //services.AddSingleton(logger);
+
             services.AddControllers();
 
             services.AddHangfire(config =>
                 config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseDefaultTypeSerializer()
-                .UseMemoryStorage());
+                .UseMemoryStorage()
+                .UseConsole());
 
             services.AddHangfireServer();
 
@@ -118,20 +132,25 @@ namespace FOS.Paymetric.POC.HFSchedulerService
                 c.CustomSchemaIds(i => i.FullName);
             });
 
+            // ==========================
+            // load the kafka config that is available to all plug-ins
+            // ==========================
             var kafkaConfig = Configuration.GetSection("kafkaConfig").Get<KafkaServiceConfigBE>();
+            services.AddSingleton(kafkaConfig);
 
             // ==========================
             // load the plug-in assys 
             // ==========================
             Compose();
+            services.AddSingleton(_scheduleTaskPlugIns);
 
             // ==========================
-            // on startup, inject the config info into all of the plug-ins
+            // on startup, inject the config info and the logger into all of the plug-ins
             // ==========================
-            //foreach (var plugin in _messageSenders)
-            //{
-            //    plugin.Value.InjectConfig(kafkaConfig, logger);
-            //}
+            foreach (var plugin in _scheduleTaskPlugIns)
+            {
+                plugin.Value.InjectConfig(kafkaConfig);
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -178,31 +197,6 @@ namespace FOS.Paymetric.POC.HFSchedulerService
         #region Helpers
 
         /// <summary>
-        /// Dynamically pick the correct plug-in from the ones we loaded
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <returns>IEventPublisher.</returns>
-        private static IEventPublisher GetEventPublisher(string name)
-        {
-            var plugIn = MessageSenders
-              .Where(ms => ms.Metadata.Name.Equals(name))
-              .Select(ms => ms.Value);
-
-            if (plugIn == null || plugIn.Count() == 0)
-            {
-                throw new ApplicationException($"No plug-in found for Event Type: [{name}]");
-            }
-            else if (plugIn.Count() != 1)
-            {
-                throw new ApplicationException($"Multiple plug-ins [{plugIn.Count()}] found for Event Type: [{name}]");
-            }
-            else
-            {
-                return plugIn.FirstOrDefault();
-            }
-        }
-
-        /// <summary>
         /// Build the composition host from assys that are dynamically loaded from a specific subfolder.
         /// </summary>
         private static void Compose()
@@ -228,7 +222,7 @@ namespace FOS.Paymetric.POC.HFSchedulerService
                 // load the plug-in assys that export the correct attribute
                 using (var container = configuration.CreateContainer())
                 {
-                    MessageSenders = container.GetExports<Lazy<IEventPublisher, MessageSenderType>>();
+                    _scheduleTaskPlugIns = container.GetExports<Lazy<IJobPlugIn, JobPlugInType>>();
                 }
             }
             catch (ReflectionTypeLoadException ex)
@@ -303,7 +297,7 @@ namespace FOS.Paymetric.POC.HFSchedulerService
             // find the names of all the plug-in subfolders
             var plugInFolderPathNames = Directory.GetDirectories(path);
 
-            Dictionary<string, IEnumerable<Lazy<IEventPublisher, MessageSenderType>>> test = new Dictionary<string, IEnumerable<Lazy<IEventPublisher, MessageSenderType>>>();
+            Dictionary<string, IEnumerable<Lazy<IJobPlugIn, JobPlugInType>>> test = new Dictionary<string, IEnumerable<Lazy<IJobPlugIn, JobPlugInType>>>();
 
             // loop thru each plug-in subfolder and load the assys into a separate (isolated) load context.
             foreach (var plugInFolderPathName in plugInFolderPathNames)
@@ -325,12 +319,12 @@ namespace FOS.Paymetric.POC.HFSchedulerService
                 // load the plug-in assys that export the correct attribute
                 using (var container = configuration.CreateContainer())
                 {
-                    MessageSenders = container.GetExports<Lazy<IEventPublisher, MessageSenderType>>();
+                    _scheduleTaskPlugIns = container.GetExports<Lazy<IJobPlugIn, JobPlugInType>>();
                 }
 
-                test.Add(plugInFolderName, MessageSenders);
+                test.Add(plugInFolderName, _scheduleTaskPlugIns);
 
-                MessageSenders = (IEnumerable<Lazy<IEventPublisher, MessageSenderType>>)test.Values.ToList();
+                _scheduleTaskPlugIns = (IEnumerable<Lazy<IJobPlugIn, JobPlugInType>>)test.Values.ToList();
             }
         }
         #endregion

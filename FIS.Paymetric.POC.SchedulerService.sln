@@ -6,12 +6,28 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOS.Paymetric.POC.HFSchedulerService", "FOS.Paymetric.POC.HFSchedulerService\FOS.Paymetric.POC.HFSchedulerService.csproj", "{4C920A06-61C2-4C86-956B-5D256C17D2A2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FIS.Paymetric.POC.EventTypeA.Plugin", "FIS.Paymetric.POC.EventTypeA.Plugin\FIS.Paymetric.POC.EventTypeA.Plugin.csproj", "{2D8B6BF3-2E69-468B-A5A4-09D4D793BB5F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{826B1CCE-B681-406E-9FEC-F6D30AC83AB9} = {826B1CCE-B681-406E-9FEC-F6D30AC83AB9}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOS.Paymetric.POC.HFSchedulerService.Shared", "FOS.Paymetric.POC.HFSchedulerService.Shared\FOS.Paymetric.POC.HFSchedulerService.Shared.csproj", "{826B1CCE-B681-406E-9FEC-F6D30AC83AB9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SchedulerService", "SchedulerService", "{B426286B-C43D-4BA7-9A59-801F6F23B86A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PlugIns", "PlugIns", "{2C5FBAE5-6A3C-4C6F-9D82-30DBC3D25EDE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PlugInsStaging", "PlugInsStaging", "{63BB70BA-8AE5-48DF-BF7B-637AA4EA185F}"
+	ProjectSection(SolutionItems) = preProject
+		PlugInsStaging\ReadMe.txt = PlugInsStaging\ReadMe.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PlugInsShared", "PlugInsShared", "{5495F4F0-EB8A-4377-81CE-AB89A724DF34}"
+	ProjectSection(SolutionItems) = preProject
+		PlugInsShared\FOS.Paymetric.POC.HFSchedulerService.Shared.deps.json = PlugInsShared\FOS.Paymetric.POC.HFSchedulerService.Shared.deps.json
+		PlugInsShared\FOS.Paymetric.POC.HFSchedulerService.Shared.dll = PlugInsShared\FOS.Paymetric.POC.HFSchedulerService.Shared.dll
+		PlugInsShared\FOS.Paymetric.POC.HFSchedulerService.Shared.pdb = PlugInsShared\FOS.Paymetric.POC.HFSchedulerService.Shared.pdb
+		PlugInsShared\ReadMe.txt = PlugInsShared\ReadMe.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

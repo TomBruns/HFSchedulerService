@@ -35,7 +35,7 @@
             </summary>
             <returns>ActionResult&lt;List&lt;ExisitingRecurringJobBE&gt;&gt;.</returns>
         </member>
-        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Hangfire.RequestController.InjectConfig(System.Collections.Generic.IEnumerable{System.Lazy{FOS.Paymetric.POC.HFSchedulerService.Shared.Interfaces.IEventPublisher,FOS.Paymetric.POC.HFSchedulerService.Shared.MessageSenderType}},FOS.Paymetric.POC.HFSchedulerService.Shared.Entities.KafkaServiceConfigBE,Microsoft.Extensions.Logging.ILogger)">
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Hangfire.RequestController.InjectConfig(System.Collections.Generic.IEnumerable{System.Lazy{FOS.Paymetric.POC.HFSchedulerService.Shared.Interfaces.IJobPlugIn,FOS.Paymetric.POC.HFSchedulerService.Shared.JobPlugInType}},FOS.Paymetric.POC.HFSchedulerService.Shared.Entities.KafkaServiceConfigBE,Microsoft.Extensions.Logging.ILogger)">
             <summary>
             Injects the configuration.
             </summary>
@@ -43,28 +43,46 @@
             <param name="kafkaConfig">The kafka configuration.</param>
             <param name="logger">The logger.</param>
         </member>
-        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Hangfire.RequestController.EnqueueRequest(System.String,System.String,System.String,System.String,System.String)">
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Hangfire.RequestController.EnqueueRequest(System.String)">
             <summary>
             Enqueue a request with the information necessary to dynamically load the necessary assy on the other side of the hangfire queue
             </summary>
         </member>
         <member name="M:FOS.Paymetric.POC.HFSchedulerService.Hangfire.RequestController.ExecuteRequest(System.String,System.String,System.String,System.String)">
             <summary>
-            Dynamically load the correct assy and invoke the target method
+            Dynamically load the correct assy and invoke the target method using reflection
             </summary>
+        </member>
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Hangfire.RequestController.ExecuteRequest(System.String,Hangfire.Server.PerformContext)">
+            <summary>
+            Executes the request using an implementation in a plug-in assy
+            </summary>
+            <param name="pluginToken">The plugin token.</param>
+            <param name="context">The context.</param>
+        </member>
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Hangfire.RequestController.GetJobPlugIn(System.String)">
+            <summary>
+            Gets the job plug in.
+            </summary>
+            <param name="jobPlugInType">Type of the job plugIn.</param>
+            <returns>IScheduledTask.</returns>
+            <exception cref="T:System.ApplicationException">No plug-in found for Event Type: [{jobPlugInType}]</exception>
+            <exception cref="T:System.ApplicationException">Multiple plug-ins [{plugIn.Count()}] found for Event Type: [{scheduledTaskType}]</exception>
+        </member>
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Logging.HangfireConsoleSerilogEnricher.Enrich(Serilog.Events.LogEvent,Serilog.Core.ILogEventPropertyFactory)">
+            <inheritdoc />
+        </member>
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Logging.HangfireConsoleSink.Emit(Serilog.Events.LogEvent)">
+            <inheritdoc />
+        </member>
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Logging.PerformContextValue.Render(System.IO.TextWriter,System.String,System.IFormatProvider)">
+            <inheritdoc />
         </member>
         <member name="T:FOS.Paymetric.POC.HFSchedulerService.Startup.ApiExplorerGroupPerVersionConvention">
             <summary>
             Implements Grouping in the Swagger UI using the version that is last part of the namespace
             </summary>
             <seealso cref="T:Microsoft.AspNetCore.Mvc.ApplicationModels.IControllerModelConvention" />
-        </member>
-        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Startup.GetEventPublisher(System.String)">
-            <summary>
-            Dynamically pick the correct plug-in from the ones we loaded
-            </summary>
-            <param name="name">The name.</param>
-            <returns>IEventPublisher.</returns>
         </member>
         <member name="M:FOS.Paymetric.POC.HFSchedulerService.Startup.Compose">
             <summary>
