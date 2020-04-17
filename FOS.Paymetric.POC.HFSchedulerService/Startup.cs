@@ -35,7 +35,8 @@ namespace FOS.Paymetric.POC.HFSchedulerService
     public class Startup
     {
         // this is the subfolder where all the plug-ins will be loaded from
-        const string PLUGIN_FOLDER = @"Plugins";
+        private const string PLUGIN_FOLDER = @"Plugins";
+        private const int MAX_DEFAULT_WORKER_COUNT = 20;
 
         public Startup(IConfiguration configuration)
         {
@@ -65,15 +66,26 @@ namespace FOS.Paymetric.POC.HFSchedulerService
 
             services.AddControllers();
 
+            // ==========================
+            // load the hangfire config 
+            //  NOTE:  We are jsut using the In-Memory storage for the POC
+            //          A real implementation would use a DB backed store
+            // ==========================
+            var hangfireConfig = Configuration.GetSection("hangfireConfig").Get<HangfireServiceConfigBE>();
+
             services.AddHangfire(config =>
                 config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseDefaultTypeSerializer()
-                .UseMemoryStorage()
+                .UseMemoryStorage()     // config param PollIntervalInSecs does not apply to InMemory Storage
                 .UseConsole());
 
-            services.AddHangfireServer();
+            services.AddHangfireServer(config =>
+                config.WorkerCount = hangfireConfig.WorkerCount != -1 ? hangfireConfig.WorkerCount : Math.Min(Environment.ProcessorCount * 5, MAX_DEFAULT_WORKER_COUNT));
 
+            // =========================
+            // config swagger
+            // =========================
             services.AddMvc(c =>
             {
                 c.Conventions.Add(new ApiExplorerGroupPerVersionConvention()); // decorate Controllers to distinguish SwaggerDoc (v1, v2, etc.)
@@ -81,8 +93,6 @@ namespace FOS.Paymetric.POC.HFSchedulerService
 
             // all of the entities with sample requests are in the current assembly
             //services.AddSwaggerExamplesFromAssemblyOf<RaftFindAuthXctRequestBE>();
-
-            // config swagger
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -133,16 +143,16 @@ namespace FOS.Paymetric.POC.HFSchedulerService
             });
 
             // ==========================
-            // load the kafka config that is available to all plug-ins
-            // ==========================
-            var kafkaConfig = Configuration.GetSection("kafkaConfig").Get<KafkaServiceConfigBE>();
-            services.AddSingleton(kafkaConfig);
-
-            // ==========================
             // load the plug-in assys 
             // ==========================
             Compose();
             services.AddSingleton(_scheduleTaskPlugIns);
+
+            // ==========================
+            // load the kafka config that is available to all plug-ins
+            // ==========================
+            var kafkaConfig = Configuration.GetSection("kafkaConfig").Get<KafkaServiceConfigBE>();
+            services.AddSingleton(kafkaConfig);
 
             // ==========================
             // on startup, inject the config info and the logger into all of the plug-ins
@@ -175,6 +185,10 @@ namespace FOS.Paymetric.POC.HFSchedulerService
                 endpoints.MapControllers();
             });
 
+            var dashboardOptions = new DashboardOptions()
+            {
+
+            };
             app.UseHangfireDashboard();
             app.UseHangfireServer(new BackgroundJobServerOptions { WorkerCount = 2 });
         }

@@ -28,7 +28,6 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Hangfire
         {
             _jobPlugIns = messageSenders;
             _kafkaConfig = kafkaConfig;
-            //_logger = logger;
         }
 
         /// <summary>
@@ -41,8 +40,6 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Hangfire
         {
             _jobPlugIns = messageSenders;
             _kafkaConfig = kafkaConfig;
-            //_logger = logger;
-
         }
 
         /// <summary>
@@ -85,8 +82,8 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Hangfire
 
             var logger = context.CreateLoggerForPerformContext<RequestController>();
 
-            context.WriteLine("Did this work?");
-            logger.Information("This goes to the job console automatically");
+            //context.WriteLine("Did this work?");
+            //logger.Information("This goes to the job console automatically");
 
             // call the method on the dynamically selected assy
             jobPlugIn.Execute(context.BackgroundJob.Id, logger);
