@@ -39,26 +39,25 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Controllers.v1
         /// <returns>ActionResult.</returns>
         [HttpPost]
         [ProducesResponseType((int)HttpStatusCode.Created)]
-        //public void ScheduledJob(int stdRequestTypeID, string jobIdentifier, string pncUserName, string userComments, Dictionary<string, string> wfDataKeyValuePairs, string schedule, string schedule_time_zone)
-        public ActionResult ScheduleRecurringJob()
+        public ActionResult ScheduleRecurringJob(NewRecurringJobBE recurringJobConfig)
         {
-            string recurringJobId = @"some-id".ToLower(); ;
+            string recurringJobId = recurringJobConfig.JobId.ToLower(); ;
 
             // 1st remove the Job if it exists
             RecurringJob.RemoveIfExists(recurringJobId);
 
             TimeZoneInfo timeZoneInfo = TimeZoneInfo.Local;
 
-            //switch (schedule_time_zone.ToUpper())
-            //{
-            //    case "EST":
-            timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
-            //        break;
+            switch (recurringJobConfig.ScheduleTimeZone.ToUpper())
+            {
+                case "EST":
+                    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+                    break;
 
-            //    default:
-            //        timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
-            //        break;
-            //}
+                default:
+                    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+                    break;
+            }
 
             // run the background job immediately
             //_backgroundJobClient.Enqueue(() => Console.WriteLine("Hello Hangfire job!"));
@@ -80,8 +79,12 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Controllers.v1
             //                                                                               timeZoneInfo);
             #endregion
 
-            RecurringJob.AddOrUpdate(recurringJobId, () => RequestController.EnqueueRequest(@"EventTypeA"),
-                                                                               @"0-59 * * * MON,TUE,WED,THU,FRI",
+            //RecurringJob.AddOrUpdate(recurringJobId, () => RequestController.EnqueueRequest(@"EventTypeA"),
+            //                                                                   @"0-59 * * * MON,TUE,WED,THU,FRI",
+            //                                                                   timeZoneInfo);
+
+            RecurringJob.AddOrUpdate(recurringJobId, () => RequestController.EnqueueRequest(recurringJobConfig.JobPlugInType),
+                                                                               recurringJobConfig.CronSchedule,
                                                                                timeZoneInfo);
 
             return Ok($"Recurring job: [{recurringJobId}] created.");

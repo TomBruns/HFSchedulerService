@@ -16,7 +16,7 @@
             <param name="logger">The logger.</param>
             <param name="backgroundJobClient">The background job client.</param>
         </member>
-        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController.ScheduleRecurringJob">
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Controllers.v1.RecurringJobsController.ScheduleRecurringJob(FOS.Paymetric.POC.HFSchedulerService.Entities.NewRecurringJobBE)">
             <summary>
             Schedules a recurring ob.
             </summary>
@@ -34,6 +34,11 @@
             Gets all of the recurring jobs.
             </summary>
             <returns>ActionResult&lt;List&lt;ExisitingRecurringJobBE&gt;&gt;.</returns>
+        </member>
+        <member name="T:FOS.Paymetric.POC.HFSchedulerService.Entities.NewRecurringJobBE">
+            <summary>
+            This class defines a recurring job that should be scheduled
+            </summary>
         </member>
         <member name="M:FOS.Paymetric.POC.HFSchedulerService.Hangfire.RequestController.InjectConfig(System.Collections.Generic.IEnumerable{System.Lazy{FOS.Paymetric.POC.HFSchedulerService.Shared.Interfaces.IJobPlugIn,FOS.Paymetric.POC.HFSchedulerService.Shared.JobPlugInType}},FOS.Paymetric.POC.HFSchedulerService.Shared.Entities.KafkaServiceConfigBE,Microsoft.Extensions.Logging.ILogger)">
             <summary>
