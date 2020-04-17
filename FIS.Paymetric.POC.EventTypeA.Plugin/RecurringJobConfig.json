@@ -1,5 +1,6 @@
 {
-  "job_id": "Check for Invoices every minute",
+  "job_id": "JOB001",
+  "job_description": "Check for Invoices every minute",
   "job_plugin_type": "EventTypeA",
   "cron_schedule": "0-59 * * * MON,TUE,WED,THU,FRI",
   "schedule_time_zone": "EST"

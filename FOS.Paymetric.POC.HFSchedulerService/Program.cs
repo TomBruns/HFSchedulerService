@@ -17,6 +17,9 @@ using FOS.Paymetric.POC.HFSchedulerService.Shared.Entities;
 
 namespace FOS.Paymetric.POC.HFSchedulerService
 {
+    /// <summary>
+    /// Main entry point for the executable
+    /// </summary>
     // https://csharp.christiannagel.com/2019/10/15/windowsservice/
     // https://github.com/dotnet/AspNetCore.Docs/blob/master/aspnetcore/host-and-deploy/windows-service/samples/3.x/WebAppServiceSample/Program.cs
     public class Program

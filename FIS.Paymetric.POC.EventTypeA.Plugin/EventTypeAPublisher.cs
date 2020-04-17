@@ -12,6 +12,7 @@ using FOS.Paymetric.POC.HFSchedulerService.Shared;
 using FOS.Paymetric.POC.HFSchedulerService.Shared.Entities;
 using FOS.Paymetric.POC.HFSchedulerService.Shared.Interfaces;
 using static FOS.Paymetric.POC.HFSchedulerService.Shared.Constants.SchedulerConstants;
+using System.Threading;
 
 namespace FIS.Paymetric.POC.EventTypeA.Plugin
 {
@@ -55,7 +56,7 @@ namespace FIS.Paymetric.POC.EventTypeA.Plugin
         /// <returns>StdTaskReturnValueBE.</returns>
         public StdTaskReturnValueBE Execute(string jobId, ILogger logger)
         {
-            logger.Information($"Hello Hangfire jobid: [{jobId}]!", jobId);
+            logger.Information("Hello from Hangfire jobid: {jobId}!", jobId);
 
             return new StdTaskReturnValueBE() { StepStatus = STD_STEP_STATUS.SUCCESS, ReturnMessage = "Ok" };
         }

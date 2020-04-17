@@ -8,22 +8,32 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using Hangfire;
-using Hangfire.Server;
 using Hangfire.Console;
+using Hangfire.Server;
+using Hangfire.Storage;
 
 using FOS.Paymetric.POC.HFSchedulerService.Shared;
 using FOS.Paymetric.POC.HFSchedulerService.Shared.Entities;
 using FOS.Paymetric.POC.HFSchedulerService.Shared.Interfaces;
 using FOS.Paymetric.POC.HFSchedulerService.Logging;
 
+
 namespace FOS.Paymetric.POC.HFSchedulerService.Hangfire
 {
+    /// <summary>
+    /// This class holds the methods used to Enqueue and Execute Jobs in Hangfire
+    /// </summary>
     public class RequestController
     {
         private KafkaServiceConfigBE _kafkaConfig;
         //private ILogger _logger;
         private IEnumerable<Lazy<IJobPlugIn, JobPlugInType>> _jobPlugIns;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequestController"/> class.
+        /// </summary>
+        /// <param name="messageSenders">The message senders.</param>
+        /// <param name="kafkaConfig">The kafka configuration.</param>
         public RequestController(IEnumerable<Lazy<IJobPlugIn, JobPlugInType>> messageSenders, KafkaServiceConfigBE kafkaConfig)
         {
             _jobPlugIns = messageSenders;
@@ -45,13 +55,13 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Hangfire
         /// <summary>
         /// Enqueue a request with the information necessary to dynamically load the necessary assy on the other side of the hangfire queue
         /// </summary>
-        [DisplayName("Enqueue Job, PlugIn Token: {0}")]
-        public static void EnqueueRequest(string plugInToken)
+        [DisplayName("Enqueue Job Id: {0}, Token: {1}")]
+        public static void EnqueueRequest(string jobId, string plugInToken)
         {
             // the process submitting creates new fire & forget jobs
             // they can be processed in parallel on any available thread on any server running hangfire
             //BackgroundJob.Enqueue(() => RequestController.ExecuteRequest(className, assyName, methodName, parmValue));
-            BackgroundJob.Enqueue<RequestController>(rc => rc.ExecuteRequest(plugInToken, null));
+            BackgroundJob.Enqueue<RequestController>(rc => rc.ExecuteRequest(jobId, plugInToken, null));
         }
 
         /// <summary>
@@ -72,18 +82,30 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Hangfire
         /// <summary>
         /// Executes the request using an implementation in a plug-in assy
         /// </summary>
+        /// <param name="jobId">The job identifier.</param>
         /// <param name="pluginToken">The plugin token.</param>
         /// <param name="context">The context.</param>
-        [DisplayName("Execute Job: Plugin [{0}]")]
-        public void ExecuteRequest(string pluginToken, PerformContext context)
+        [DisplayName("Execute Job Id: {0}, Token: {1}")]
+        public void ExecuteRequest(string jobId, string pluginToken, PerformContext context)
         {
-            // use the string value of the EventType property to dynamically select the correct plug-in assy to use to process the event
-            IJobPlugIn jobPlugIn = GetJobPlugIn(pluginToken);
-
+            // create a logger
             var logger = context.CreateLoggerForPerformContext<RequestController>();
 
-            //context.WriteLine("Did this work?");
-            //logger.Information("This goes to the job console automatically");
+            // This is a 1st pass at preventing duplicate recurring job when the previous execution is still running
+            var job = JobStorage.Current.GetConnection().GetRecurringJobs().Where(j => j.Id == jobId).FirstOrDefault();
+            if (job != null)
+            {
+                if (job.LastJobState == "Enqueued" || job.LastJobState == "Processing")
+                {
+                    //logger.Information("This goes to the job console automatically");
+
+                    logger.Warning("Skipping execution of JobId: {jobId}, it is still running from a previous execution.", jobId);
+                    return;
+                }
+            }
+
+            // use the string value of the EventType property to dynamically select the correct plug-in assy to use to process the event
+            IJobPlugIn jobPlugIn = GetJobPlugIn(pluginToken);
 
             // call the method on the dynamically selected assy
             jobPlugIn.Execute(context.BackgroundJob.Id, logger);
