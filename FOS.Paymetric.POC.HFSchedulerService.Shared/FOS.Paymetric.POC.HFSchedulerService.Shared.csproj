@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>FIS USA ESA Team, Tom Bruns</Authors>
+    <Copyright>Copyright © FIS USA ESA Team 2020</Copyright>
+    <RepositoryUrl>https://github.com/TomBruns/HFSchedulerService</RepositoryUrl>
+    <Company>Fidelity National Information Services Inc (FIS)</Company>
+    <Description>Shared Assy used by all Hangfire Scheduler PlugIns</Description>
+    <RepositoryType>git</RepositoryType>
+    <PackageId>HFSchedulerService.Shared</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
