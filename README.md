@@ -26,19 +26,17 @@ All of the scheduled tasks are packaged as `plug-ins`  that are dynamically load
 ---
 ## Solution Structure
 
-Here is the structure of solution for the POC
-
 ![Solution Structure](./images/solutionStructure2.jpg?raw=true)
+
 ---
 ## Steps to compile and run
 
 | step | Description |
 | ---- | ----------- |
-| 1. Compile `FOS.Paymetric.POC.HFSchedulerService.Shared` |  This is the shared assembly.  A post build step copies this to the `PlugInsShared` solution folder (Note: In real use this would b packaged as a nuget package. |
-| 2a. `dotnet publish --runtime win-x64 --self-contained true` | run this command *in each plug-in project folder* to compile the plug-in (and copy all of its dependencies) |
-| 2b. `dotnet build -target:CopyToStaging` | run this command *in each plug-in project folder* to the output to a subfolder in the `PlugInsStaging` solution folder |
-| 3. Compile the `FOS.Paymetric.POC.HFSchedulerService` | Note: This is hosting EXE.  A post-build step copies all of the plugins from the `PlugInsStaging` solution folder to the `plugins` folder in the `targetdir` |
-
+| 1. Compile `FOS.Paymetric.POC.HFSchedulerService.Shared` |  This is the shared assembly.  A post build step copies this assembly to the `PlugInsShared` solution folder (Note: In real use this could be packaged as a nuget package. |
+| 2a. `dotnet publish --runtime win-x64 --self-contained true` | run this command *in each plug-in project folder* to compile the plug-in (and gather all of its dependencies) |
+| 2b. `dotnet build -target:CopyToStaging` | run this command *in each plug-in project folder* to copy the output to a subfolder in the `PlugInsStaging` solution folder |
+| 3. Compile the `FOS.Paymetric.POC.HFSchedulerService` | Note: This is the hosting EXE.  A post-build step copies all of the plugins from the `PlugInsStaging` solution folder to the `plugins` folder in the `targetdir` |
 
 ---
 ## Useful links when running
@@ -50,6 +48,8 @@ Here are some useful link when running the POC locally
 | [https://localhost:5000/hangfire](https://localhost:5000/hangfire) | Hangfire Dashboard |
 | [https://localhost:5000/swagger](https://localhost:5000/swagger)| Swagger website for recurring Job WebAPI   |
 
+> **Note**: The HTTP port is set in the hosting exe's `appsettings.json` file 
+
 ---
 ## Implementing Scheduled Plug-In Jobs
 
@@ -57,17 +57,17 @@ Scheduled jobs all implement an interface (located in a shared assy) and are mar
 
 > **Note**: The string associated with the ExportMetadata attribute must be globally unique and is used to identify a plug-in 
 
-![Swagger](./images/plugin.jpg?raw=true)
+![Plugin](./images/plugIn.jpg?raw=true)
 
 > **Note**: The plug-in assembly and its dependencies would typically be copied to a subfolder of the hosting EXE.  
 
 Each plug-in supports its own private configuration that can be loaded from a local  appsettings.json file
 
-![Swagger](./images/pluginConfig.jpg?raw=true)
+![PlugIn Config](./images/pluginConfig.jpg?raw=true)
 
 Plug-ins can write log messages directly to the Hangfire Console using standard methods on the ILogger interface that is passed in on the `Execute` method.
 
-![Swagger](./images/logging.jpg?raw=true)
+![Logging](./images/logging.jpg?raw=true)
 
 ---
 ## Scheduled Job Administration (WebAPI)
