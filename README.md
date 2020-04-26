@@ -23,7 +23,18 @@ All of the scheduled tasks are packaged as `plug-ins`  that are dynamically load
 | [Swashbuckle.AspNetCore](https://www.nuget.org/packages/Swashbuckle.AspNetCore/) | Swagger tools for documenting APIs built on ASP.NET Core |
 | [Serilog](https://serilog.net/) | Structured logging |
 
+---
+## Hangfire
+
+Hangfire is an OpenSource .NET Core library similar to [Celery](http://www.celeryproject.org/) for python that can add support for background processing to .NET applications. 
+
+In this POC we are leveraging it support recurring (scheduled) jobs.
+
+![Hangfire](./images/hangfire.jpg?raw=true)
+
 > **Note**: This POC used Hangfire's InMemory Storage option.  In real-world scenarios this should be replaced with a persistent datastore (ex. MSSQL Server)
+
+> **Note**: Hangfire is horizontally scaleable by running additional Windows Service instances.  Typically these would be executed on different physical or virtual servers to avoid processer thread contention with this instance.
 
 ---
 ## Solution Structure
@@ -73,8 +84,6 @@ The hosting process (EXE) appsettings.json file contains configration informatio
   "AllowedHosts": "*"
 }
 ```
-
-> **Note**: Hangfire is horizontally scaleable by running additional Windows Service instances.  Typically these would be executed on different physical or virtual instances to avoid processer thread contention with this instance.
 
 ---
 ## Implementing Scheduled Plug-In Jobs
