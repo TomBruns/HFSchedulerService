@@ -42,7 +42,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{51810C
 		images\plugIn.jpg = images\plugIn.jpg
 		images\pluginConfig.jpg = images\pluginConfig.jpg
 		images\scheduleJob.jpg = images\scheduleJob.jpg
-		images\SolutionStructure.jpg = images\SolutionStructure.jpg
+		images\solutionStructure.jpg = images\solutionStructure.jpg
 		images\swagger.jpg = images\swagger.jpg
 	EndProjectSection
 EndProject
