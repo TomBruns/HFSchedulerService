@@ -18,7 +18,7 @@ All of the scheduled tasks are packaged as `plug-ins`  that are dynamically load
 |Technology | Description |
 |---- | ------------ |
 | Windows Service / Console App  | Hosting Process |
-| [System.Composition](https://docs.microsoft.com/en-us/dotnet/api/system.composition?view=dotnet-plat-ext-3.1)  | Naemspace containing classes to support creating a plug-in architecture|
+| [System.Composition](https://docs.microsoft.com/en-us/dotnet/api/system.composition?view=dotnet-plat-ext-3.1)  | Namespace containing classes to support creating a plug-in architecture|
 | [Hangfire](https://www.hangfire.io/) | Open-source framework that helps you to create, process and manage your background jobs |
 | [Swashbuckle.AspNetCore](https://www.nuget.org/packages/Swashbuckle.AspNetCore/) | Swagger tools for documenting APIs built on ASP.NET Core |
 | [Serilog](https://serilog.net/) | Structured logging |
@@ -28,7 +28,7 @@ All of the scheduled tasks are packaged as `plug-ins`  that are dynamically load
 
 Here is the structure of solution for the POC
 
-![Solution Structure](../images/SolutionStructure.jpg?raw=true)
+![Solution Structure](../images/solutionStructure2.jpg?raw=true)
 ---
 ## Steps to compile and run
 
