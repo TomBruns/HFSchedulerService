@@ -28,7 +28,7 @@ All of the scheduled tasks are packaged as `plug-ins`  that are dynamically load
 
 Here is the structure of solution for the POC
 
-![Solution Structure](../images/solutionStructure2.jpg?raw=true)
+![Solution Structure](./images/solutionStructure2.jpg?raw=true)
 ---
 ## Steps to compile and run
 
@@ -57,24 +57,24 @@ Scheduled jobs all implement an interface (located in a shared assy) and are mar
 
 > **Note**: The string associated with the ExportMetadata attribute must be globally unique and is used to identify a plug-in 
 
-![Swagger](../images/plugin.jpg?raw=true)
+![Swagger](./images/plugin.jpg?raw=true)
 
 > **Note**: The plug-in assembly and its dependencies would typically be copied to a subfolder of the hosting EXE.  
 
 Each plug-in supports its own private configuration that can be loaded from a local  appsettings.json file
 
-![Swagger](../images/pluginConfig.jpg?raw=true)
+![Swagger](./images/pluginConfig.jpg?raw=true)
 
 Plug-ins can write log messages directly to the Hangfire Console using standard methods on the ILogger interface that is passed in on the `Execute` method.
 
-![Swagger](../images/logging.jpg?raw=true)
+![Swagger](./images/logging.jpg?raw=true)
 
 ---
 ## Scheduled Job Administration (WebAPI)
 
 s The scheduled jobs can be fully administered (add, remove, list) using a webAPI that includes a Swagger Website.
 
-![Swagger](../images/swagger.jpg?raw=true)
+![Swagger](./images/swagger.jpg?raw=true)
 
 Using the `POST` endpoint you can pass the data required to schedule a reoccurring task.
 
@@ -94,11 +94,11 @@ Using the `POST` endpoint you can pass the data required to schedule a reoccurri
 
 The scheduled jobs can be viewed on the Hangfire Dashboard on the `Recurring Jobs` tab
 
-![Swagger](../images/hangfireRecurringJobs.jpg?raw=true)
+![Swagger](./images/hangfireRecurringJobs.jpg?raw=true)
 
 The scheduled jobs execution history can be viewed on the Hangfire Dashboard on the `Jobs` tab
 
-![Swagger](../images/hangfireJob.jpg?raw=true)
+![Swagger](./images/hangfireJob.jpg?raw=true)
 
 ---
 ## Hosting Process Config
