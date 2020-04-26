@@ -29,6 +29,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PlugInsShared", "PlugInsSha
 		PlugInsShared\ReadMe.txt = PlugInsShared\ReadMe.txt
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{71ABAD2C-99F7-4382-826B-132E1208E09C}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{51810C1B-F999-426C-B047-C3CD2F8DB2DE}"
+	ProjectSection(SolutionItems) = preProject
+		images\hangfireJob.jpg = images\hangfireJob.jpg
+		images\hangfireRecurringJobs.jpg = images\hangfireRecurringJobs.jpg
+		images\logging.jpg = images\logging.jpg
+		images\plugIn.jpg = images\plugIn.jpg
+		images\pluginConfig.jpg = images\pluginConfig.jpg
+		images\scheduleJob.jpg = images\scheduleJob.jpg
+		images\SolutionStructure.jpg = images\SolutionStructure.jpg
+		images\swagger.jpg = images\swagger.jpg
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

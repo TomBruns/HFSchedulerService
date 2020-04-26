@@ -5,7 +5,7 @@ All of the folders & files here are copied to a subfolder of the Scheduling Serv
 
 In the real world all of the appropriate folders and assys would be copied there are deployment time
 
-In this POC, run these commands (inthis order) in each plug-in project folder
+In this POC, run these commands (in this order) in each plug-in project folder
 1. dotnet publish --runtime win-x64 --self-contained true
 
 2. dotnet build -target:CopyToStaging
