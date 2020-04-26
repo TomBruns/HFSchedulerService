@@ -23,6 +23,8 @@ All of the scheduled tasks are packaged as `plug-ins`  that are dynamically load
 | [Swashbuckle.AspNetCore](https://www.nuget.org/packages/Swashbuckle.AspNetCore/) | Swagger tools for documenting APIs built on ASP.NET Core |
 | [Serilog](https://serilog.net/) | Structured logging |
 
+> **Note**: This POC used Hangfire's InMemory Storage option.  In real-world scenarios this should be replaced with a persistent datastore (ex. MSSQL Server)
+
 ---
 ## Solution Structure
 
