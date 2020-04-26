@@ -51,6 +51,30 @@ Here are some useful link when running the POC locally
 > **Note**: The HTTP port is set in the hosting exe's `appsettings.json` file 
 
 ---
+## Hosting Process Config
+
+The hosting process (EXE) appsettings.json file contains configration information for Hangfire and for Kafka.  Kafka can be configured centrally and is passed into each plug-in.
+
+```json
+{
+  "kafkaConfig": {
+    "bootstrapServers": "localhost:9092",
+    "schemaRegistry": "localhost:8081"
+  },
+  "hangfireConfig": {
+    "isUseSSL": true,
+    "dashboardPortNumber": "5000",
+    "isDashboardRemoteAccessEnabled": true,
+    "workerCount": -1,
+    "pollIntervalInSecs": 15
+  },
+  "AllowedHosts": "*"
+}
+```
+
+> **Note**: Hangfire is horizontally scaleable by running additional Windows Service instances.  Typically these would be executed on different physical or virtual instances to avoid processer thread contention with this instance.
+
+---
 ## Implementing Scheduled Plug-In Jobs
 
 Scheduled jobs all implement an interface (located in a shared assy) and are marked-up with a set of attributes that allow the runtime to find them.
@@ -72,7 +96,7 @@ Plug-ins can write log messages directly to the Hangfire Console using standard 
 ---
 ## Scheduled Job Administration (WebAPI)
 
-s The scheduled jobs can be fully administered (add, remove, list) using a webAPI that includes a Swagger Website.
+The scheduled jobs can be fully administered (add, remove, list) using a webAPI that includes a Swagger Website.
 
 ![Swagger](./images/swagger.jpg?raw=true)
 
@@ -100,24 +124,3 @@ The scheduled jobs execution history can be viewed on the Hangfire Dashboard on 
 
 ![Swagger](./images/hangfireJob.jpg?raw=true)
 
----
-## Hosting Process Config
-
-The hosting process (EXE) appsettings.json file contains configration information for Hangfire and for Kafka.  Kafka can be configured centrally and is passed into each plug-in.
-
-```json
-{
-  "kafkaConfig": {
-    "bootstrapServers": "localhost:9092",
-    "schemaRegistry": "localhost:8081"
-  },
-  "hangfireConfig": {
-    "isUseSSL": true,
-    "dashboardPortNumber": "5000",
-    "isDashboardRemoteAccessEnabled": true,
-    "workerCount": -1,
-    "pollIntervalInSecs": 15
-  },
-  "AllowedHosts": "*"
-}
-```
