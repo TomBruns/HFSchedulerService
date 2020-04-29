@@ -1,5 +1,5 @@
 ﻿using FOS.Paymetric.POC.HFSchedulerService.Entities;
-using FOS.Paymetric.POC.HFSchedulerService.Hangfire;
+using FOS.Paymetric.POC.HFSchedulerService.Managers;
 using Hangfire;
 using Hangfire.Common;
 using Hangfire.Storage;
@@ -83,10 +83,11 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Controllers.v1
             //                                                                   @"0-59 * * * MON,TUE,WED,THU,FRI",
             //                                                                   timeZoneInfo);
 
-            RecurringJob.AddOrUpdate(recurringJobId, () => RequestController.EnqueueRequest(recurringJobConfig.JobId,
-                                                                                            recurringJobConfig.JobPlugInType),
-                                                                                            recurringJobConfig.CronSchedule,
-                                                                                            timeZoneInfo);
+            RecurringJob.AddOrUpdate(recurringJobId, () => HangfireRequestManager.EnqueueRequest(recurringJobConfig.JobId,
+                                                                                                    recurringJobConfig.JobPlugInType,
+                                                                                                    recurringJobConfig.JobPlugInVersion),
+                                                                                                    recurringJobConfig.CronSchedule,
+                                                                                                    timeZoneInfo);
 
             return Ok($"Recurring job: [{recurringJobId}] created.");
         }

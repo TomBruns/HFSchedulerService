@@ -19,6 +19,8 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Shared.Interfaces
     {
         void InjectConfig(KafkaServiceConfigBE kafkaConfig);
 
+        string GetDTCompiled();
+
         StdTaskReturnValueBE Execute(string jobId, ILogger logger);
     }
 }

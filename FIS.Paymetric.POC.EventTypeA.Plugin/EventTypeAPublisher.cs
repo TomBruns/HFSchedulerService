@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Composition;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Configuration;
@@ -12,7 +14,7 @@ using FOS.Paymetric.POC.HFSchedulerService.Shared;
 using FOS.Paymetric.POC.HFSchedulerService.Shared.Entities;
 using FOS.Paymetric.POC.HFSchedulerService.Shared.Interfaces;
 using static FOS.Paymetric.POC.HFSchedulerService.Shared.Constants.SchedulerConstants;
-using System.Threading;
+
 
 namespace FIS.Paymetric.POC.EventTypeA.Plugin
 {
@@ -20,7 +22,8 @@ namespace FIS.Paymetric.POC.EventTypeA.Plugin
     /// This is a plug-in class and knows how to publish EventTypeA events
     /// </summary>
     [Export(typeof(IJobPlugIn))]
-    [ExportMetadata(JobPlugInType.ATTRIBUTE_NAME, @"EventTypeA")]
+    [ExportMetadata(JobPlugInType.NAME_ATTRIBUTE, @"EventTypeA")]
+    [ExportMetadata(JobPlugInType.VERSION_ATTRIBUTE, 1.0)]
     public class EventTypeAPublisher : IJobPlugIn
     {
         KafkaServiceConfigBE _kafkaConfig;
@@ -56,9 +59,22 @@ namespace FIS.Paymetric.POC.EventTypeA.Plugin
         /// <returns>StdTaskReturnValueBE.</returns>
         public StdTaskReturnValueBE Execute(string jobId, ILogger logger)
         {
-            logger.Information("Hello from Hangfire jobid: {jobId}!", jobId);
+
+
+            logger.Information("Hello from Hangfire jobid: {jobId}, compiled at: [{compileTimestamp}]!", jobId, GetDTCompiled());
 
             return new StdTaskReturnValueBE() { StepStatus = STD_STEP_STATUS.SUCCESS, ReturnMessage = "Ok" };
+        }
+
+        public string GetDTCompiled()
+        {
+            var compileTimestamp = typeof(EventTypeAPublisher)
+                                            .Assembly
+                                            .GetCustomAttributes<AssemblyMetadataAttribute>()
+                                            .First(a => a.Key == "CompileTimestamp")
+                                            .Value;
+
+            return compileTimestamp;
         }
     }
 }

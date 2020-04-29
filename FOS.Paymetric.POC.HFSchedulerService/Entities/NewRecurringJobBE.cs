@@ -32,6 +32,13 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Entities
         [JsonPropertyName(@"job_plugin_type")]
         public string JobPlugInType { get; set; }
 
+        /// <summary>
+        /// Gets or sets the version of the job plug in.
+        /// </summary>
+        /// <value>The version of the job plug in.</value>
+        [JsonPropertyName(@"job_plugin_version")]
+        public decimal JobPlugInVersion { get; set; }
+
         //[JsonPropertyName(@"parameters")]
         //public object[] parameters { get; set; }
 

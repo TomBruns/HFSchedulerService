@@ -9,8 +9,12 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Shared
     /// </summary>
     public class JobPlugInType
     {
-        public const string ATTRIBUTE_NAME = "Name";
+        public const string NAME_ATTRIBUTE = "Name";
+        public const string VERSION_ATTRIBUTE = "Version";
 
         public string Name { get; set; }
+
+        // parameter widening
+        public double Version { get; set; }
     }
 }

@@ -13,6 +13,13 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadata">
+      <_Parameter1>CompileTimestamp</_Parameter1>
+      <_Parameter2>$([System.DateTime]::Now.ToString('F'))</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+  
   <!-- Define an item group that filters out the .NET Framework assys -->
   <ItemGroup>
     <ModuleFiles Include="$(TargetDir)win-x64\publish\*.dll;$(TargetDir)win-x64\publish\*.json" Exclude="$(TargetDir)win-x64\publish\System*.dll;$(TargetDir)win-x64\publish\Microsoft*.dll">
