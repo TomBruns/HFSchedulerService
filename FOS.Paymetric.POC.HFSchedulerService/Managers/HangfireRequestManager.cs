@@ -16,7 +16,7 @@ using FOS.Paymetric.POC.HFSchedulerService.Shared;
 using FOS.Paymetric.POC.HFSchedulerService.Shared.Entities;
 using FOS.Paymetric.POC.HFSchedulerService.Shared.Interfaces;
 using FOS.Paymetric.POC.HFSchedulerService.Logging;
-
+using System.Runtime.Loader;
 
 namespace FOS.Paymetric.POC.HFSchedulerService.Managers
 {
@@ -99,10 +99,15 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Managers
             // use the string value of the EventType property to dynamically select the correct plug-in assy to use to process the event
             IJobPlugIn jobPlugIn = GetJobPlugIn(pluginToken, plugInVersion);
 
+            var xx = AssemblyLoadContext.All;
+
+            var plugInLoadContextName = AssemblyLoadContext.GetLoadContext(jobPlugIn.GetType().Assembly).Name;
+            logger.Information("Running plugin {pluginToken}.{plugInVersion} from ALC: {plugInLoadContextName}.", pluginToken, plugInVersion, plugInLoadContextName);
+
             // call the method on the dynamically selected assy
             jobPlugIn.Execute(context.BackgroundJob.Id, logger);
 
-            context.WriteLine();
+            //context.WriteLine();
         }
 
         /// <summary>

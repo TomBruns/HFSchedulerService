@@ -1,11 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Composition;
-using System.Composition.Hosting;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 
 using Hangfire;
+using Hangfire.Console;
 using Hangfire.MemoryStorage;
 using Serilog;
 using Serilog.Extensions.Logging;
@@ -28,7 +25,7 @@ using FOS.Paymetric.POC.HFSchedulerService.Shared.Entities;
 using FOS.Paymetric.POC.HFSchedulerService.Shared.Interfaces;
 using FOS.Paymetric.POC.HFSchedulerService.Shared;
 using FOS.Paymetric.POC.HFSchedulerService.Logging;
-using Hangfire.Console;
+
 using FOS.Paymetric.POC.HFSchedulerService.Managers;
 
 namespace FOS.Paymetric.POC.HFSchedulerService
@@ -36,7 +33,6 @@ namespace FOS.Paymetric.POC.HFSchedulerService
     public class Startup
     {
         // this is the subfolder where all the plug-ins will be loaded from
-        private const string PLUGIN_FOLDER = @"Plugins";
         private const int MAX_DEFAULT_WORKER_COUNT = 20;
 
         public Startup(IConfiguration configuration)
@@ -45,7 +41,6 @@ namespace FOS.Paymetric.POC.HFSchedulerService
         }
 
         private IConfiguration Configuration { get; }
-
 
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -62,6 +57,8 @@ namespace FOS.Paymetric.POC.HFSchedulerService
             //services.AddSingleton(logger);
 
             services.AddControllers();
+
+            var plugInsConfig = Configuration.GetSection("plugInsConfig").Get<PlugInsConfigBE>(); 
 
             // ==========================
             // load the hangfire config 
@@ -142,7 +139,7 @@ namespace FOS.Paymetric.POC.HFSchedulerService
             // ==========================
             // load the plug-in assys 
             // ==========================
-            var plugInsManager = new PlugInsManager(PLUGIN_FOLDER);
+            var plugInsManager = new PlugInsManager(plugInsConfig);
             services.AddSingleton(plugInsManager);
 
             // ==========================

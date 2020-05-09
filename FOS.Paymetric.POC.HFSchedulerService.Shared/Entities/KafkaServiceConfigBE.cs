@@ -12,6 +12,7 @@ namespace FOS.Paymetric.POC.HFSchedulerService.Shared.Entities
     {
         [JsonPropertyName(@"bootstrapServers")]
         public string BootstrapServers { get; set; }
+
         [JsonPropertyName(@"schemaRegistry")]
         public string SchemaRegistry { get; set; }
     }

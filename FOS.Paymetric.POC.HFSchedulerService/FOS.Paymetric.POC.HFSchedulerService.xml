@@ -245,23 +245,24 @@
             <summary>
             Build the composition host from assys that are dynamically loaded from a specific subfolder.
             </summary>
+            <param name="plugInsFolder"></param>
         </member>
         <member name="M:FOS.Paymetric.POC.HFSchedulerService.Managers.PlugInsManager.GetListOfManagedAssemblies(System.String,System.IO.SearchOption)">
             <summary>
             Gets the list of managed assemblies.
             </summary>
-            <param name="folderPath">The folder path.</param>
+            <param name="folderPath">The parent folder that contains the plug-ins.</param>
             <param name="searchOption">The search option.</param>
             <returns>List&lt;System.String&gt;.</returns>
             <remarks>
             Some of the dlls in the target folder may be unmanaged dlls referenced by managed dlls, we need to exclude those
             </remarks>
         </member>
-        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Managers.PlugInsManager.ComposeIsolated(System.String,System.Collections.Generic.List{System.String})">
+        <member name="M:FOS.Paymetric.POC.HFSchedulerService.Managers.PlugInsManager.ComposeIsolated(FOS.Paymetric.POC.HFSchedulerService.Shared.Entities.PlugInsConfigBE)">
             <summary>
             A research spike into loading each plugin's assys into an isolated AssemblyLoadContext
             </summary>
-            <param name="assysToIgnore">The assys to ignore.</param>
+            <param name="plugInsConfig"></param>
             <remarks>
             assysToIgnore is a list of assys NOT to load into the plug-in AssemblyLoadContext so the types will
             match and the a GetExports call will recognize them as the same type
